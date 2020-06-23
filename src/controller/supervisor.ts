@@ -7,6 +7,7 @@ router.post("", async (request: Request, response: Response) => {
     try {
         const params = request.body;
         await tile.jset("supervisor", params.id, "subscription", JSON.stringify(params.subscription));
+
         response.status(200);
         response.json({ ok: true });
     } catch (e) {

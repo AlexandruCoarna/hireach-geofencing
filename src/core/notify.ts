@@ -1,8 +1,12 @@
 import tile from "./tile-client";
 import webpush from "web-push";
+import config from "../config";
 
 const notify = async (targetId, payload) => {
-    const targetSupervisors = await tile.jget("targetSupervisor", targetId).catch();
+    if (!config.webPush.privateKey || !config.webPush.publicKey || !config.webPush.mailTo) {
+        return;
+    }
+    const targetSupervisors = await tile.jget("targetSupervisor", targetId).catch(() => null);
     if (!targetSupervisors) return;
     const supervisorIds = JSON.parse(JSON.parse(targetSupervisors)["supervisors"]);
     for (let id of supervisorIds) {

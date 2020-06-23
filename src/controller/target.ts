@@ -27,7 +27,8 @@ router.post('', async (request: Request, response: Response) => {
 router.put('', async (request: Request, response: Response) => {
     try {
         const params: any = request.body;
-        await tile.set("target", params.id, params.coords);
+        // check first if target exits !!
+        await tile.set("target", params.id, params.position);
 
         await checkOffroad(params.id);
         await checkCustomAreas(params.id);
