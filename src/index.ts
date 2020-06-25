@@ -25,7 +25,7 @@ app.use("/supervisor", supervisor);
 app.get("/", async (req: Request, res: Response) => {
     const response: any = {
         status: `ok`,
-        message: `App runs on port ${process.env.port}`,
+        message: `App runs on port ${config.port}`,
         data: {}
     };
 
@@ -60,5 +60,6 @@ app.get("/delete/:key/:id", async (request: Request, response: Response) => {
     }
 });
 
-
+// import express, { Request, Response } from 'express';
+// const app = express();
 app.listen(config.port || 80);
