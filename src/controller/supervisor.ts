@@ -1,19 +1,15 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import tile from "../core/tile-client";
+import Handle from "../core/handle";
 
 const router = express.Router();
 
-router.post("", async (request: Request, response: Response) => {
-    try {
-        const params = request.body;
-        await tile.jset("supervisor", params.id, "subscription", JSON.stringify(params.subscription));
+router.post("", Handle(async (request, response) => {
+    const params = request.body;
+    await tile.jset("supervisor", params.id, "subscription", JSON.stringify(params.subscription));
 
-        response.status(200);
-        response.json({ ok: true });
-    } catch (e) {
-        response.status(400);
-        response.json({ ok: false, error: e.message });
-    }
-});
+    response.status(200);
+    response.json({ ok: true });
+}));
 
 export default router;

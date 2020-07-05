@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import bodyParser from "body-parser";
 import cors from "cors";
 
@@ -7,6 +7,7 @@ import target from "./controller/target";
 import supervisor from "./controller/supervisor";
 import config from "./config";
 import webpushInit from "./core/webpush-init";
+import Handle from "./core/handle";
 
 const app = express();
 
@@ -22,7 +23,7 @@ app.use("/supervisor", supervisor);
 
 
 // dev purpose
-app.get("/", async (req: Request, res: Response) => {
+app.get("/", Handle(async (request, repsonse) => {
     const response: any = {
         status: `ok`,
         message: `App runs on port ${config.port}`,
@@ -35,11 +36,11 @@ app.get("/", async (req: Request, res: Response) => {
     response.data.targetSupervisor = await tile.scanQuery("targetSupervisor").execute();
     response.data.supervisor = await tile.scanQuery("supervisor").execute();
 
-    res.status(200);
-    res.json(response);
-});
+    repsonse.status(200);
+    repsonse.json(response);
+}));
 
-app.get("/flush", async (request: Request, response: Response) => {
+app.get("/flush", Handle(async (request, response) => {
     response.status(200);
     if (process.env.env === 'development') {
         await tile.flushdb();
@@ -47,9 +48,9 @@ app.get("/flush", async (request: Request, response: Response) => {
     } else {
         response.send("You are not on DEV env");
     }
-});
+}));
 
-app.get("/delete/:key/:id", async (request: Request, response: Response) => {
+app.get("/delete/:key/:id", Handle(async (request, response) => {
     response.status(200);
     if (process.env.env === 'development') {
         const params = request.params;
@@ -58,8 +59,6 @@ app.get("/delete/:key/:id", async (request: Request, response: Response) => {
     } else {
         response.send("You are not on DEV env");
     }
-});
+}));
 
-// import express, { Request, Response } from 'express';
-// const app = express();
 app.listen(config.port || 80);
