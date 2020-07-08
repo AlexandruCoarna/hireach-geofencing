@@ -11,9 +11,9 @@ const checkOffroad = async id => {
         isNear = nearBy.count;
         if (isNear) break;
     }
-    
+
     if (!isNear) {
-        const payload = JSON.stringify({ title: 'WARNING!', body: 'Target went OffRoad!' });
+        const payload = JSON.stringify({title: 'WARNING!', body: 'Target went OffRoad!'});
         await notify(id, payload);
     }
 };
@@ -27,7 +27,7 @@ const checkCustomAreas = async id => {
         let nearBy = await tile.nearbyQuery("target").point(area.point[0], area.point[1], 30).match(id).execute();
         if (!nearBy.count) continue;
         if (!notificationsCustomArea.includes(area.id)) {
-            const payload = JSON.stringify({ title: 'Custom Area', body: `Target reached ${area.id}` });
+            const payload = JSON.stringify({title: 'Custom Area', body: `Target reached ${area.id}`});
             await notify(id, payload);
             notificationsCustomArea.push(area.id);
             // try to remove the area from array
@@ -37,4 +37,4 @@ const checkCustomAreas = async id => {
     }
 };
 
-export { checkOffroad, checkCustomAreas };
+export {checkOffroad, checkCustomAreas};

@@ -1,8 +1,8 @@
 import express from 'express';
 import tile from "../core/tile-client";
 import inBetween from "../core/in-between";
-import { checkCustomAreas, checkOffroad } from "../core/target-checks";
-import { addSupervisor, removeSupervisor } from "../core/target-supervisor";
+import {checkCustomAreas, checkOffroad} from "../core/target-checks";
+import {addSupervisor, removeSupervisor} from "../core/target-supervisor";
 import Handle from "../core/handle";
 
 const router = express.Router();
@@ -17,7 +17,7 @@ router.post('', Handle(async (request, response) => {
     await tile.jset("targetDetails", params.id, "notifications.offRoad", '');
 
     response.status(200);
-    response.json({ ok: true });
+    response.json({ok: true});
 
 }));
 
@@ -30,7 +30,7 @@ router.put('', Handle(async (request, response) => {
     await checkCustomAreas(params.id);
 
     response.status(200);
-    response.json({ ok: true });
+    response.json({ok: true});
 }));
 
 router.put("/supervisor", Handle(async (request, response) => {
@@ -38,7 +38,7 @@ router.put("/supervisor", Handle(async (request, response) => {
     await addSupervisor(params);
 
     response.status(200);
-    response.json({ ok: true });
+    response.json({ok: true});
 }));
 
 router.delete("/supervisor", Handle(async (request, response) => {
@@ -46,7 +46,7 @@ router.delete("/supervisor", Handle(async (request, response) => {
     await removeSupervisor(params);
 
     response.status(200);
-    response.json({ ok: true });
+    response.json({ok: true});
 }));
 
 

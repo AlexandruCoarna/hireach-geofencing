@@ -6,8 +6,10 @@ const notify = async (targetId, payload) => {
     if (!config.webPush.privateKey || !config.webPush.publicKey || !config.webPush.mailTo) {
         return;
     }
+
     const targetSupervisors = await tile.jget("targetSupervisor", targetId).catch(() => null);
     if (!targetSupervisors) return;
+
     const supervisorIds = JSON.parse(JSON.parse(targetSupervisors)["supervisors"]);
     for (let id of supervisorIds) {
         const supervisor = JSON.parse(await tile.jget("supervisor", id));

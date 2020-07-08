@@ -6,7 +6,8 @@
   "scripts": {
     "tsc": "tsc",
     "tsc:watch": "tsc --watch",
-    "start:docker:dev": "npm install && npm install -g typescript pm2 && npm run tsc && pm2 start ecosystem.config.js && echo \"Go to localhost:8000\""
+    "start:docker:dev": "npm install && npm install -g typescript pm2 && npm run tsc && pm2 start ecosystem.config.js && echo \"Go to localhost:8000\"",
+    "serve:dev": "pm2 start ecosystem.config.js && echo \"Go to localhost:8000\" "
   },
   "keywords": [],
   "author": "",

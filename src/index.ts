@@ -59,6 +59,17 @@ app.get("/delete/:key/:id", Handle(async (request, response) => {
     } else {
         response.send("You are not on DEV env");
     }
+    if (process.env.env === 'development') {
+        const params = request.params;
+        await tile.del(params.key, params.id);
+        response.send(`Deleted ${params.key} - ${params.id}`);
+    } else {
+        response.send("You are not on DEV env");
+    }
 }));
+
+if (process.env.env === 'development') {
+    app.use(express.static('public'));
+}
 
 app.listen(config.port || 80);
