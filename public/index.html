@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Document</title>
 </head>
 <body>
@@ -27,7 +27,7 @@
             swRegistration = swReg;
         })
         .catch(err => {
-            window.alert(`ERROR -> ${JSON.stringify(err)}`);
+            window.alert(`ERROR -> ${ JSON.stringify(err) }`);
         });
 
     function subscribeUser() {
@@ -39,7 +39,7 @@
                 updateSubscriptionOnServer(subscription);
             })
             .catch(err => {
-                window.alert(`ERROR -> ${JSON.stringify(err)}`);
+                window.alert(`ERROR -> ${ JSON.stringify(err) }`);
             });
     }
 
@@ -47,23 +47,23 @@
 
         const response1 = await fetch("/supervisor", {
             method: "POST",
-            body: JSON.stringify({id: 1, subscription: subscription || {}}),
-            headers: {'Content-Type': 'application/json'}
+            body: JSON.stringify({ id: 1, subscription: subscription || {} }),
+            headers: { 'Content-Type': 'application/json' }
         });
 
         if (!response1.ok) {
-            window.alert(`ERROR! -> ${JSON.stringify(await response1.json())}`);
+            window.alert(`ERROR! -> ${ JSON.stringify(await response1.json()) }`);
             return;
         }
 
         const response2 = await fetch("/target/supervisor", {
             method: subscription ? "PUT" : "DELETE",
-            body: JSON.stringify({targetId: 1, supervisorId: 1}),
-            headers: {'Content-Type': 'application/json'}
+            body: JSON.stringify({ targetId: 1, supervisorId: 1 }),
+            headers: { 'Content-Type': 'application/json' }
         });
 
         if (!response2.ok) {
-            window.alert(`ERROR! -> ${JSON.stringify(await response2.json())}`);
+            window.alert(`ERROR! -> ${ JSON.stringify(await response2.json()) }`);
         }
     }
 
@@ -78,7 +78,7 @@
                 updateSubscriptionOnServer(null);
             })
             .catch(function (err) {
-                window.alert(`ERROR -> ${JSON.stringify(err)}`);
+                window.alert(`ERROR -> ${ JSON.stringify(err) }`);
             })
     }
 </script>

@@ -5,7 +5,7 @@ const webpushInit = () => {
     if (!config.webPush.privateKey || !config.webPush.publicKey || !config.webPush.mailTo) {
         return;
     }
-    
+
     webpush.setVapidDetails(config.webPush.mailTo, config.webPush.publicKey, config.webPush.privateKey);
 };
 

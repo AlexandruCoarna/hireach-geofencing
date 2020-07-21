@@ -7,8 +7,9 @@ const Handle = (cb: HttpHandler): HttpHandler => {
         try {
             await cb(request, response);
         } catch (e) {
+            console.warn(e);
             response.status(400);
-            response.json({ ok: false, error: e.message });
+            response.json({ ok: false, error: e.message || e });
         }
     }
 }
