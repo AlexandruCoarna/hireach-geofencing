@@ -1,4 +1,4 @@
-import { get, getTimeDifference } from "./helpers";
+import { generateCustomConfig, getTimeDifference } from "./helpers";
 import { Needle } from "../models/needle";
 import { notifyMessages } from "../notify-messages";
 import { CustomError } from "./custom-error";
@@ -17,10 +17,10 @@ type notifyType =
 const getNotifyMessage = async (notifyType: notifyType, needle: Needle) => {
     if (!needle.id) throw new CustomError("needle.id is required for notify mesasges");
 
-    const customConf: CustomConfig = { ...customConfig, ...await get("targetCustomConfig", needle.id) as CustomConfig };
+    const customConf: CustomConfig = await generateCustomConfig(undefined, needle.id);
 
     const map = {
-        id: customConfig.targetName || needle.id,
+        id: customConf.targetName || needle.id,
         customArea: needle.customArea ? needle.customArea.name || JSON.stringify(needle.customArea.position) : '',
         timetableCustomArea: needle.timetableCustomArea ? needle.timetableCustomArea.name || JSON.stringify(needle.timetableCustomArea.position) : '',
         timeDifference: needle.time && needle.timetableCustomArea ? getTimeDifference(needle.time, needle.timetableCustomArea) : '',

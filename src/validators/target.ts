@@ -53,9 +53,17 @@ const validatePostTargetParams = async (params: PostTarget) => {
     if (!params.isFencingOn) return;
 
     if (!params.id || (typeof params.id !== 'string' && typeof params.id !== 'number'))
-        throw new CustomError("id is required and must be string or number", params);
+        throw new CustomError("id is required and must be string or number");
 
-    if (!params.fence || typeof params.fence !== "object") throw new CustomError("fence is required and must be an object")
+    if (!params.fence || typeof params.fence !== "object") throw new CustomError("fence is required and must be an object");
+
+    Object.keys(params.fence).forEach(key => {
+        if (!['area', 'customAreas', 'timetableCustomAreas'].includes(key)) {
+            throw new CustomError("Property doesn't exist in fence object", {
+                property: key
+            })
+        }
+    });
 
     if (!params.fence.area || !Array.isArray(params.fence.area) || !params.fence.area.length)
         throw new CustomError("fence.area is required and must be array of multiple [Latitude, Longitude]");
@@ -75,6 +83,14 @@ const validatePostTargetParams = async (params: PostTarget) => {
 
         for (let customArea of params.fence.customAreas) {
             if (typeof customArea !== 'object') throw new CustomError("fence.customAreas must be an object");
+
+            Object.keys(customArea).forEach(key => {
+                if (!['name', 'position'].includes(key)) {
+                    throw new CustomError("Property doesn't exist in fence.customArea object", {
+                        property: key
+                    })
+                }
+            });
 
             if (!customArea.position || !Array.isArray(customArea.position) || customArea.position.length !== 2)
                 throw new CustomError("fence.customAreas.position must be array of [Latitude, Longitude]");
@@ -96,6 +112,14 @@ const validatePostTargetParams = async (params: PostTarget) => {
         for (let timetableCustomArea of params.fence.timetableCustomAreas) {
             if (typeof timetableCustomArea !== 'object')
                 throw new CustomError("fence.timetableCustomArea must be an object");
+
+            Object.keys(timetableCustomArea).forEach(key => {
+                if (!['name', 'position', 'time', 'error'].includes(key)) {
+                    throw new CustomError("Property doesn't exist in fence.timetableCustomArea object", {
+                        property: key
+                    })
+                }
+            });
 
             if (!timetableCustomArea.position || !Array.isArray(timetableCustomArea.position) || timetableCustomArea.position.length !== 2)
                 throw new CustomError("fence.timetableCustomArea.position must be array of [Latitude, Longitude]");
@@ -126,6 +150,11 @@ const validateCustomConfig = (customConf: CustomConfig) => {
     if (!customConf || typeof customConf !== 'object') throw new CustomError("customConfig must be an object");
 
     Object.keys(customConf).forEach(key => {
+        if (!['timeTableErrorMinutes', 'offFenceAreaNotificationIntervalMiutes', 'fenceNearbyRetry', 'fenceAreaBorderMeters',
+            'fenceAreaBetweenPointsMeters', 'customAreaRadiusMeters', 'notifyMessageLanguage', 'targetName',].includes(key)) {
+            throw new CustomError("Property doesn't exist in customConfig object", { property: key })
+        }
+
         if (key === 'targetName') {
             if (typeof customConf[key] !== 'string') throw new CustomError(`${ key } must be string`);
         } else if (key === 'notifyMessageLanguage') {
@@ -155,7 +184,7 @@ const validateFenceValues = async (params: PostTarget, customConf: CustomConfig)
     let isNear: boolean;
 
     for (let customArea of customAreas) {
-        await set('tempLocation', 1, customArea.position);
+        await set('tempLocation', params.id, customArea.position);
         for (let position of fenceArea) {
             const nearBy = await tile.nearbyQuery("tempLocation").point(position[0], position[1], customConf.fenceAreaBorderMeters).match(1).execute();
             if ((isNear = nearBy.count)) break;
@@ -166,7 +195,7 @@ const validateFenceValues = async (params: PostTarget, customConf: CustomConfig)
         }
     }
 
-    if (result.length) throw new CustomError(`Following custom areas are not in the fence area range`, { badCustomAreas: result });
+    if (result.length) throw new CustomError(`Following customAreas and timetableCustomAreas are not in the fence area range`, { badCustomAreas: result });
 };
 
 export {

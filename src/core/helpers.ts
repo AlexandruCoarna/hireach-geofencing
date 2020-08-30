@@ -46,6 +46,11 @@ const getTimeDifference = (time: number, timetableCustomArea: TimetableCustomAre
 
     seconds = Math.floor(parseInt(seconds) % 60).toString();
     seconds = (parseInt(seconds) >= 10) ? seconds.toString() : "0" + seconds;
+
+    hours = hours || "00";
+    minutes = minutes || "00";
+    seconds = seconds || "00";
+
     return `${ hours }h:${ minutes }m:${ seconds }s`;
 };
 

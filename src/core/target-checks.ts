@@ -109,7 +109,7 @@ const checkTimetableCustomAreas = async (id: string | number, config: CustomConf
     if (!timetableCustomAreas.length) return response;
 
     const notificationTimetableCustomAreas = await get('targetNotificationTimetableCustomAreas', id) as string[];
-    const lateNotificationTimetableCustomAreas = await get('targetNotificationTimetableCustomAreas', id) as string[];
+    const lateNotificationTimetableCustomAreas = await get('targetLateNotificationTimetableCustomAreas', id) as string[];
     const time = Date.now();
 
     for (let timetableCustomArea of timetableCustomAreas) {
@@ -122,12 +122,10 @@ const checkTimetableCustomAreas = async (id: string | number, config: CustomConf
             .execute();
 
         if (lateNotificationTimetableCustomAreas.includes(JSON.stringify(timetableCustomArea.position))) break;
-
-        response.currentTime = time;
-        response.timetableCustomArea = timetableCustomArea;
-
-        if (nearBy.count && time - timetableCustomArea.time > (timetableCustomArea.error || config.timeTableErrorMinutes) * 60000) {
+        if (nearBy.count && time - timetableCustomArea.time > (timetableCustomArea.error + 1 || config.timeTableErrorMinutes + 1) * 60000) {
             response.notifyLateArrival = true;
+            response.currentTime = time;
+            response.timetableCustomArea = timetableCustomArea;
             response.mesage = await getNotifyMessage("notifyLateArrival", { id, timetableCustomArea, time });
 
             lateNotificationTimetableCustomAreas.push(JSON.stringify(timetableCustomArea.position));
@@ -137,8 +135,10 @@ const checkTimetableCustomAreas = async (id: string | number, config: CustomConf
 
         if (notificationTimetableCustomAreas.includes(JSON.stringify(timetableCustomArea.position))) break;
 
-        if (!nearBy.count && time - timetableCustomArea.time > (timetableCustomArea.error || config.timeTableErrorMinutes) * 60000) {
+        if (!nearBy.count && time - timetableCustomArea.time > (timetableCustomArea.error + 1 || config.timeTableErrorMinutes + 1) * 60000) {
             response.notifyNoArrival = true;
+            response.currentTime = time;
+            response.timetableCustomArea = timetableCustomArea;
             response.mesage = await getNotifyMessage("notifyNoArrival", { id, timetableCustomArea });
 
             notificationTimetableCustomAreas.push(JSON.stringify(timetableCustomArea.position));
@@ -148,6 +148,8 @@ const checkTimetableCustomAreas = async (id: string | number, config: CustomConf
 
         if (nearBy.count && time < timetableCustomArea.time) {
             response.notifyEarlyArrival = true;
+            response.currentTime = time;
+            response.timetableCustomArea = timetableCustomArea;
             response.mesage = await getNotifyMessage("notifyEarlyArrival", { id, timetableCustomArea, time });
 
             notificationTimetableCustomAreas.push(JSON.stringify(timetableCustomArea.position));
