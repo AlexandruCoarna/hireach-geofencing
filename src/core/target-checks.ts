@@ -1,47 +1,162 @@
 import tile from "./tile-client";
-import notify from "./notify";
-import deepParse from "./deep-parse";
+import { get, set, stopFencingSession } from "./helpers";
+import { TimetableCustomArea } from "../models/timetable-custom-area";
+import { CustomArea } from "../models/custom-area";
+import { Position } from "../models/position";
+import { getNotifyMessage } from "./get-notify-message";
+import { CustomConfig } from "../models/custom-config";
 
-const checkOffroad = async id => {
+const checkFenceArea = async (id: string | number, config: CustomConfig) => {
+    const response = {
+        notifyReachedDestination: false,
+        notifyOutOfFence: false,
+        mesage: ""
+    };
+
+    let fenceArea = await get("targetFenceArea", id) as Position[];
+
+    const notificationFenceArea = await get('targetNotificationFenceArea', id);
+    let fenceNearbyRetry = await get('targetFenceNearbyRetry', id);
+
     let isNear: boolean;
+    for (let i = 0; i < fenceArea.length; i++) {
+        const nearBy = await tile.nearbyQuery("target").point(fenceArea[i][0], fenceArea[i][1], config.fenceAreaBorderMeters).match(id).execute();
+        if ((isNear = nearBy.count)) {
+            if (fenceArea[i - 1]) {
+                fenceArea = fenceArea.slice(i - 1);
+                await set("targetFenceArea", id, fenceArea);
+            }
+            fenceNearbyRetry = 0;
+            break;
+        }
+    }
 
-    const targetDetails = deepParse(await tile.jget("targetDetails", id));
-    if (!targetDetails) return;
-
-    for (let point of targetDetails.fence.coords) {
-        let nearBy = await tile.nearbyQuery("target").point(point[0], point[1], 50).match(id).execute();
-        isNear = nearBy.count;
-        if (isNear) break;
+    if (fenceArea.length <= 20) {
+        const nearByEnd = await tile.nearbyQuery("target")
+            .point(
+                fenceArea[fenceArea.length - 1][0],
+                fenceArea[fenceArea.length - 1][1], 30)
+            .match(id)
+            .execute();
+        if (nearByEnd.count) {
+            response.notifyReachedDestination = true;
+            response.mesage = await getNotifyMessage("notifyReachedDestination", { id });
+            await stopFencingSession(id);
+            return response;
+        }
     }
 
     if (!isNear) {
-        const payload = JSON.stringify({ title: 'WARNING!', body: 'Target went OffRoad!' });
-        await notify(id, payload);
+        if (fenceNearbyRetry < config.fenceNearbyRetry - 1) {
+            fenceNearbyRetry++;
+        } else {
+            const currentTime = Date.now();
+            if (!notificationFenceArea || currentTime - notificationFenceArea >= config.offFenceAreaNotificationIntervalMiutes * 60000) {
+                response.notifyOutOfFence = true;
+                response.mesage = await getNotifyMessage("notifyOutOfFence", { id });
+                await set('targetNotificationFenceArea', id, currentTime);
+            }
+        }
     }
+
+    await set('targetFenceNearbyRetry', id, fenceNearbyRetry);
+
+    return response;
 };
 
-const checkCustomAreas = async id => {
-    const targetDetails = deepParse(await tile.jget("targetDetails", id));
-    if (!targetDetails) return;
+const checkCustomAreas = async (id: string | number, config: CustomConfig) => {
+    const response = {
+        customArea: null,
+        notifyReachedCustomArea: false,
+        mesage: ""
+    };
 
-    const customAreas = targetDetails.fence.customAreas;
-    if (!customAreas.length) return;
+    const customAreas = await get('targetFenceCustomAreas', id) as CustomArea[];
+    if (!customAreas.length) return response;
 
-    const notificationsCustomArea = targetDetails.notifications.customArea;
-    for (let area of customAreas) {
-        let nearBy = await tile.nearbyQuery("target").point(area.point[0], area.point[1], 30).match(id).execute();
+    const notificationCustomArea = await get('targetNotificationCustomAreas', id) as string[];
+
+    for (let customArea of customAreas) {
+        const nearBy = await tile.nearbyQuery("target").point(customArea.position[0], customArea.position[1], config.customAreaRadiusMeters).match(id).execute();
 
         if (!nearBy.count) continue;
-        if (notificationsCustomArea.includes(area.id)) break
+        if (notificationCustomArea.includes(JSON.stringify(customArea.position))) break;
 
-        const payload = JSON.stringify({ title: 'Custom Area', body: `Target reached ${ area.id }` });
-        //todo add event system to trigger push notifications
-        notify(id, payload).then();
-        notificationsCustomArea.push(area.id);
-        // todo to remove the area from array
-        await tile.jset("targetDetails", id, "notifications.customArea", JSON.stringify(notificationsCustomArea));
+        response.customArea = customArea;
+        response.notifyReachedCustomArea = true;
+        response.mesage = await getNotifyMessage("notifyReachedCustomArea", { id, customArea });
+
+        notificationCustomArea.push(JSON.stringify(customArea.position));
+        await set('targetNotificationCustomAreas', id, notificationCustomArea);
+
         break;
     }
+
+    return response;
 };
 
-export { checkOffroad, checkCustomAreas };
+const checkTimetableCustomAreas = async (id: string | number, config: CustomConfig) => {
+    const response = {
+        currentTime: 0,
+        timetableCustomArea: null,
+        notifyLateArrival: false,
+        notifyNoArrival: false,
+        notifyEarlyArrival: false,
+        mesage: ""
+    };
+
+    const timetableCustomAreas = await get('targetTimetableCustomAreas', id) as TimetableCustomArea[];
+    if (!timetableCustomAreas.length) return response;
+
+    const notificationTimetableCustomAreas = await get('targetNotificationTimetableCustomAreas', id) as string[];
+    const lateNotificationTimetableCustomAreas = await get('targetNotificationTimetableCustomAreas', id) as string[];
+    const time = Date.now();
+
+    for (let timetableCustomArea of timetableCustomAreas) {
+        const nearBy = await tile.nearbyQuery("target")
+            .point(
+                timetableCustomArea.position[0],
+                timetableCustomArea.position[1],
+                config.customAreaRadiusMeters)
+            .match(id)
+            .execute();
+
+        if (lateNotificationTimetableCustomAreas.includes(JSON.stringify(timetableCustomArea.position))) break;
+
+        response.currentTime = time;
+        response.timetableCustomArea = timetableCustomArea;
+
+        if (nearBy.count && time - timetableCustomArea.time > (timetableCustomArea.error || config.timeTableErrorMinutes) * 60000) {
+            response.notifyLateArrival = true;
+            response.mesage = await getNotifyMessage("notifyLateArrival", { id, timetableCustomArea, time });
+
+            lateNotificationTimetableCustomAreas.push(JSON.stringify(timetableCustomArea.position));
+            await set("targetLateNotificationTimetableCustomAreas", id, lateNotificationTimetableCustomAreas);
+            break;
+        }
+
+        if (notificationTimetableCustomAreas.includes(JSON.stringify(timetableCustomArea.position))) break;
+
+        if (!nearBy.count && time - timetableCustomArea.time > (timetableCustomArea.error || config.timeTableErrorMinutes) * 60000) {
+            response.notifyNoArrival = true;
+            response.mesage = await getNotifyMessage("notifyNoArrival", { id, timetableCustomArea });
+
+            notificationTimetableCustomAreas.push(JSON.stringify(timetableCustomArea.position));
+            await set("targetNotificationTimetableCustomAreas", id, notificationTimetableCustomAreas);
+            break;
+        }
+
+        if (nearBy.count && time < timetableCustomArea.time) {
+            response.notifyEarlyArrival = true;
+            response.mesage = await getNotifyMessage("notifyEarlyArrival", { id, timetableCustomArea, time });
+
+            notificationTimetableCustomAreas.push(JSON.stringify(timetableCustomArea.position));
+            await set("targetNotificationTimetableCustomAreas", id, notificationTimetableCustomAreas);
+            break;
+        }
+    }
+
+    return response;
+};
+
+export { checkFenceArea, checkCustomAreas, checkTimetableCustomAreas };
