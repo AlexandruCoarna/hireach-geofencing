@@ -1,20 +1,48 @@
-import tile from "./tile-client";
+import { PutTargetResponse } from "../models/put-target-response";
+import { get, isFirebaseAvailable, isWebPushAvailable } from "./helpers";
 import webpush from "web-push";
-import config from "../config";
+import { notifyTitle } from "../notify-messages";
+import { Subscription } from "../models/subscription";
+import admin from "firebase-admin";
 
-const notify = async (targetId, payload) => {
-    if (!config.webPush.privateKey || !config.webPush.publicKey || !config.webPush.mailTo) {
-        return;
+const notify = async (targetId: string | number, data: PutTargetResponse) => {
+    if (data.checkFenceAreaResult.notifyOutOfFence || data.checkFenceAreaResult.notifyReachedDestination) {
+        await triggerNotification(targetId, data.checkFenceAreaResult.mesage);
     }
 
-    const targetSupervisors = await tile.jget("targetSupervisor", targetId).catch(() => null);
-    if (!targetSupervisors) return;
+    if (data.checkCustomAreasResult.notifyReachedCustomArea) {
+        await triggerNotification(targetId, data.checkCustomAreasResult.mesage);
+    }
 
-    const supervisorIds = JSON.parse(JSON.parse(targetSupervisors)["supervisors"]);
-    for (let id of supervisorIds) {
-        const supervisor = JSON.parse(await tile.jget("supervisor", id));
-        webpush.sendNotification(JSON.parse(supervisor.subscription), payload).catch(e => console.warn(e));
+    if (data.checkTimetableCustomAreasResult.notifyEarlyArrival || data.checkTimetableCustomAreasResult.notifyLateArrival || data.checkTimetableCustomAreasResult.notifyNoArrival) {
+        await triggerNotification(targetId, data.checkTimetableCustomAreasResult.mesage);
     }
 };
 
-export default notify;
+const triggerNotification = async (targetId: string | number, message: string) => {
+    if (!isWebPushAvailable() && !isFirebaseAvailable()) return;
+
+    const targetSupervisorIds = await get("targetSupervisor", targetId);
+    if (!targetSupervisorIds) return;
+
+    const notification = {
+        title: notifyTitle,
+        body: message
+    };
+
+    for (let targetSupervisorId of targetSupervisorIds) {
+        const supervisor = await get("supervisor", targetSupervisorId) as Subscription;
+
+        if (supervisor.webPush && supervisor.webPush.endpoint && supervisor.webPush.keys && supervisor.webPush.keys.auth && supervisor.webPush.keys.p256dh)
+            webpush.sendNotification(supervisor.webPush, JSON.stringify(notification)).catch(e => console.warn(e));
+
+        if (supervisor.firebase) {
+            admin.messaging().send({
+                notification: notification,
+                token: supervisor.firebase
+            }).catch(e => console.warn(e));
+        }
+    }
+};
+
+export { notify, triggerNotification };

@@ -1,10 +1,28 @@
-const config = {
+import { Config } from "./models/config";
+
+const configProd: Config = {
     port: 80,
     webPush: {
-        privateKey: "mgDcKEWkpo7AXc6UJneeflSsAdZqYkC8l-_ONP8iVXc",
-        publicKey: "BDLemtuPfbg6viIoGSgzkkeB211dtacOjHaVCqKEJL88qMuY3mnx44eVCPNYp5Wd54EdbYS8YIhBjPABuRkZvSE",
-        mailTo: "mailto:test@test.com"
-    }
-}
+        privateKey: "",
+        publicKey: "",
+        mailTo: ""
+    },
+    firebase: {
+        credential: {
+            type: "",
+            project_id: "",
+            private_key_id: "",
+            private_key: "",
+            client_email: "",
+            client_id: "",
+            auth_uri: "",
+            token_uri: "",
+            auth_provider_x509_cert_url: "",
+            client_x509_cert_url: ""
+        },
+        databaseUrl: ""
+    },
+    tileHost: 'tile'
+};
 
-export default config
+export default configProd

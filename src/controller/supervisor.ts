@@ -1,19 +1,21 @@
 import express from 'express';
-import tile from "../core/tile-client";
-import Handle from "../core/handle";
+import HandleHttp from "../core/handle-http";
+import { set } from "../core/helpers";
+import { PostSupervisor } from "../models/params/post-supervisor";
+import { validatePostSupervisorParams } from "../validators/supervisor";
+import { CustomResponse } from "../core/custom-response";
 
 const router = express.Router();
 
-router.post("", Handle(async (request, response) => {
-    const params = request.body;
+router.post("", HandleHttp(async (request, response) => {
+    const params: PostSupervisor = request.body;
 
-    if (!params.id || !params.subscription) {
-        throw new Error('An id and a subscription must be provided for supervisor');
-    }
-    await tile.jset("supervisor", params.id, "subscription", JSON.stringify(params.subscription));
+    validatePostSupervisorParams(params);
+
+    await set("supervisor", params.id, params.subscription);
 
     response.status(200);
-    response.json({ok: true});
+    response.json(new CustomResponse("Supervisor added!"));
 }));
 
 export default router;

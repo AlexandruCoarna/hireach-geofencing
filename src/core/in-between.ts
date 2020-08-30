@@ -1,5 +1,7 @@
-const distance = (p1, p2) => {
-    // ‘haversine’ formula
+import { Position } from "../models/position";
+import { CustomConfig } from "../models/custom-config";
+
+const distance = (p1: Position, p2: Position): number => {
     const R = 6371e3;
     const radius1 = p1[0] * Math.PI / 180;
     const radius2 = p2[0] * Math.PI / 180;
@@ -10,9 +12,9 @@ const distance = (p1, p2) => {
     return Math.floor(R * c);
 }
 
-const inBetween = points => {
+const inBetween = (points: Position[], customConf: CustomConfig) => {
     const result = [];
-    const meterPerSegment = 20;
+    const meterPerSegment = customConf.fenceAreaBetweenPointsMeters;
 
     for (let i = 0; i < points.length; i++) {
         if (!points[i + 1]) {
