@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>Document</title>
+</head>
+
+<style>
+    body {
+        background-color: azure;
+    }
+
+    #container {
+        margin: auto;
+        width: 1010px;
+        padding: 5px;
+    }
+
+    #button-holder {
+        margin-top: 5px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #button-holder button {
+        min-height: 25px;
+        width: 200px;
+        margin-right: 5px;
+    }
+
+    #button-holder div {
+        padding: 4px 0 4px 0;
+    }
+</style>
+
+<body>
+<div id="container">
+    <img src="predefined-road.png" alt="">
+    <div id="button-holder">
+        <div>
+            <button onclick="subscribeAndAddSupervisor()">Subscribe and become supervisor</button>
+            <span>Browser should ask to allow notifications on device, press yes.</span>
+        </div>
+        <div>
+            <button onclick="initGeofence()">Init Geofence</button>
+            <span>A notification should be sent about the fact that a new geofence session started.</span>
+        </div>
+        <div>
+            <button onclick="blueAreaNoArrival()">Blue Area No Arrival</button>
+            <span>A notification should be sent about the fact that the target didn't reach Blue Area in time.</span>
+        </div>
+        <div>
+            <button onclick="greenAreaArrival()">Green Area Arrival</button>
+            <span>A notification should be sent about the fact that the target reached Green Area.</span>
+        </div>
+        <div>
+            <button onclick="orangeAreaEarlyArrival()">Orange Area Early Arrival</button>
+            <span>A notification should be sent about the fact that the target reached Orange Area earlier than expected.</span>
+        </div>
+        <div>
+            <button onclick="blueAreaLateArrival()">Blue Area Late Arrival</button>
+            <span>A notification should be sent about the fact that the target reached Blue Area later than expected.</span>
+        </div>
+        <div>
+            <button onclick="purpleAreaOffRoad()">Purple Area Off Road</button>
+            <span>A notification should be sent after 5 tries about the fact that the target is not on the predefined route.</span>
+        </div>
+        <div>
+            <button onclick="redAreaSameSpot()">Red Area Same Spot</button>
+            <span>A notification should be sent after 1 minute about the fact that the target stays in Red Area for more than 1 minute.</span>
+        </div>
+        <div>
+            <button onclick="bAreaReachedDestination()">B Area Reached Destination</button>
+            <span>A notification should be sent about the fact that the target reached the destination.</span>
+        </div>
+        <div>
+            <button onclick="unsubscribe()">Unsubscribe</button>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="index.js"></script>
+</html>
