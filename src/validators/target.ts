@@ -1,3 +1,26 @@
+/* Geofencing API - a NodeJs + Redis API designed to monitor travelers
+during a planned trip.
+
+Copyright (C) 2020, University Politehnica of Bucharest, member
+of the HiReach Project consortium <https://hireach-project.eu/>
+<andrei[dot]gheorghiu[at]upb[dot]ro. This project has received
+funding from the European Union’s Horizon 2020 research and
+innovation programme under grant agreement no. 769819.
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { PutTarget } from "../models/params/put-target";
 import { CustomError } from "../core/custom-error";
 import { get, set } from "../core/helpers";
@@ -6,6 +29,7 @@ import { PostTarget } from "../models/params/post-target";
 import { CustomConfig } from "../models/custom-config";
 import inBetween from "../core/in-between";
 import tile from "../core/tile-client";
+import { customConfig } from "../config";
 
 const validatePutTargetParams = async (params: PutTarget) => {
     const isFenceOn = await get("targetSessionStatus", params.id);
@@ -33,12 +57,9 @@ const validatePutDeleteSupervisorParams = async (params: PutDeleteTargetSupervis
         throw new CustomError("supervisorId is required and must be string or number");
 
     if (checkSupervisor) {
-        const supervisor = await get("supervisor", params.supervisorId)
+        const supervisor = await get("supervisor", params.supervisorId);
         if (!supervisor) throw new CustomError("This supervisor does not exist", { supervisorId: params.supervisorId });
     }
-
-    const target = await get("target", params.targetId);
-    if (!target) throw new CustomError("This target does not exist", { targetId: params.targetId });
 }
 
 const validatePostTargetParams = async (params: PostTarget) => {
@@ -61,7 +82,7 @@ const validatePostTargetParams = async (params: PostTarget) => {
         if (!['area', 'customAreas', 'timetableCustomAreas'].includes(key)) {
             throw new CustomError("Property doesn't exist in fence object", {
                 property: key
-            })
+            });
         }
     });
 
@@ -88,7 +109,7 @@ const validatePostTargetParams = async (params: PostTarget) => {
                 if (!['name', 'position'].includes(key)) {
                     throw new CustomError("Property doesn't exist in fence.customArea object", {
                         property: key
-                    })
+                    });
                 }
             });
 
@@ -101,7 +122,7 @@ const validatePostTargetParams = async (params: PostTarget) => {
             });
 
             if (customArea.name && typeof customArea.name !== 'string')
-                throw new CustomError("customArea.name must be string")
+                throw new CustomError("customArea.name must be string");
         }
     }
 
@@ -117,7 +138,7 @@ const validatePostTargetParams = async (params: PostTarget) => {
                 if (!['name', 'position', 'time', 'error'].includes(key)) {
                     throw new CustomError("Property doesn't exist in fence.timetableCustomArea object", {
                         property: key
-                    })
+                    });
                 }
             });
 
@@ -136,31 +157,34 @@ const validatePostTargetParams = async (params: PostTarget) => {
                 throw new CustomError("timetableCustomArea.error must be number >= 0");
 
             if (timetableCustomArea.name && typeof timetableCustomArea.name !== 'string')
-                throw new CustomError("timetableCustomArea.name must be string")
+                throw new CustomError("timetableCustomArea.name must be string");
         }
     }
 };
 
 const isValidTimestamp = (timestamp) => {
-    const newTimestamp = new Date(timestamp).getTime()
+    const newTimestamp = new Date(timestamp).getTime();
     return !isNaN(newTimestamp) && isFinite(newTimestamp);
 }
 
 const validateCustomConfig = (customConf: CustomConfig) => {
     if (!customConf || typeof customConf !== 'object') throw new CustomError("customConfig must be an object");
 
+    const customConfigKeys = Object.keys(customConfig);
+
     Object.keys(customConf).forEach(key => {
-        if (!['timeTableErrorMinutes', 'offFenceAreaNotificationIntervalMiutes', 'fenceNearbyRetry', 'fenceAreaBorderMeters',
-            'fenceAreaBetweenPointsMeters', 'customAreaRadiusMeters', 'notifyMessageLanguage', 'targetName',].includes(key)) {
-            throw new CustomError("Property doesn't exist in customConfig object", { property: key })
+        if (!customConfigKeys.includes(key)) {
+            throw new CustomError("Property doesn't exist in customConfig object", { property: key });
         }
 
         if (key === 'targetName') {
             if (typeof customConf[key] !== 'string') throw new CustomError(`${ key } must be string`);
         } else if (key === 'notifyMessageLanguage') {
             if (!customConf[key] || typeof customConf[key] !== 'string') throw new CustomError(`${ key } must be string and must not be empty`);
+        } else if (key === 'notifyFenceStartedStatus' || key === 'notifyReachedDestinationStatus' || key === 'notifyLateArrivalStatus' || key === 'notifyEarlyArrivalStatus' || key === 'notifySameLocationStatus') {
+            if (typeof customConf[key] !== 'boolean') throw new CustomError(`${ key } must be a boolean`);
         } else {
-            if (!customConf[key] || typeof customConf[key] !== 'number' || customConf[key] < 1) throw new CustomError(`${ key } must be a number > 0`);
+            if (!customConf[key] || typeof customConf[key] !== 'number' || customConf[key] < 1) throw new CustomError(`${ key } must be a number >= 1`);
         }
     });
 
@@ -186,7 +210,10 @@ const validateFenceValues = async (params: PostTarget, customConf: CustomConfig)
     for (let customArea of customAreas) {
         await set('tempLocation', params.id, customArea.position);
         for (let position of fenceArea) {
-            const nearBy = await tile.nearbyQuery("tempLocation").point(position[0], position[1], customConf.fenceAreaBorderMeters).match(1).execute();
+            const nearBy = await tile.nearbyQuery("tempLocation")
+                .point(position[0], position[1], customConf.fenceAreaBorderMeters)
+                .match(params.id)
+                .execute();
             if ((isNear = nearBy.count)) break;
         }
 
