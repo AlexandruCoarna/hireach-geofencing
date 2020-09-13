@@ -27,12 +27,22 @@
 
     #button-holder button {
         min-height: 25px;
-        width: 200px;
         margin-right: 5px;
+        border: none;
+        background: gray;
     }
 
     #button-holder div {
         padding: 4px 0 4px 0;
+        display: flex;
+    }
+
+    button {
+        flex: 1
+    }
+
+    span {
+        flex: 4
     }
 </style>
 
@@ -49,35 +59,32 @@
             <span>A notification should be sent about the fact that a new geofence session started.</span>
         </div>
         <div>
-            <button onclick="blueAreaNoArrival()">Blue Area No Arrival</button>
-            <span>A notification should be sent about the fact that the target didn't reach Blue Area in time.</span>
+            <button onclick="blueAreaNoArrival()" style="background: #d68a77">No Arrival</button>
+            <span>This will place the target somewhere between A point and Green Area and a notification should be sent about the fact that the target didn't reach <strong>Blue Area</strong> in time. The expected arrival time for Blue Area is between 07:00:00 AM and 07:10:00 AM GMT+03</span>
         </div>
         <div>
-            <button onclick="greenAreaArrival()">Green Area Arrival</button>
-            <span>A notification should be sent about the fact that the target reached Green Area.</span>
+            <button onclick="greenAreaArrival()" style="background: #22b14c">Green Area</button>
+            <span>This is a specific point which will trigger a notification when the target reach it</span>
         </div>
         <div>
-            <button onclick="orangeAreaEarlyArrival()">Orange Area Early Arrival</button>
-            <span>A notification should be sent about the fact that the target reached Orange Area earlier than expected.</span>
+            <button onclick="orangeAreaEarlyArrival()" style="background: #ff7f27">Orange Area</button>
+            <span>This is a specific point which should be reached by the target between 14:00:00 and 14:10:00 GMT+03. This will trigger a notification because the target reach it earlier.</span>
         </div>
         <div>
-            <button onclick="blueAreaLateArrival()">Blue Area Late Arrival</button>
-            <span>A notification should be sent about the fact that the target reached Blue Area later than expected.</span>
+            <button onclick="blueAreaLateArrival()" style="background: #3f48cc">Blue Area</button>
+            <span>This is a specific point which should be reached by the target between 07:00:00 AM and 07:10:00 AM GMT+03. This will trigger a notification because the target reach it later.</span>
         </div>
         <div>
-            <button onclick="purpleAreaOffRoad()">Purple Area Off Road</button>
-            <span>A notification should be sent after 5 tries about the fact that the target is not on the predefined route.</span>
+            <button onclick="purpleAreaOffRoad()" style="background: #a349a4">Purple Area</button>
+            <span>This is a point outside the fence area and will trigger a notification <strong>after 5 consecutive tries</strong> about the fact the user is Off Fence Area.</span>
         </div>
         <div>
-            <button onclick="redAreaSameSpot()">Red Area Same Spot</button>
-            <span>A notification should be sent after 1 minute about the fact that the target stays in Red Area for more than 1 minute.</span>
+            <button onclick="redAreaSameSpot()" style="background: #ed1c24">Red Area</button>
+            <span>This will place the target in the Red Area and <strong>after 1 minute </strong>will send a notification if the target is in the same place about the fact that the target stays too much in the same spot.</span>
         </div>
         <div>
-            <button onclick="bAreaReachedDestination()">B Area Reached Destination</button>
-            <span>A notification should be sent about the fact that the target reached the destination.</span>
-        </div>
-        <div>
-            <button onclick="unsubscribe()">Unsubscribe</button>
+            <button onclick="bAreaReachedDestination()">B Area</button>
+            <span>This is the end of the route, this will trigger a notification about the fact the target reached the destination.</span>
         </div>
     </div>
 </div>

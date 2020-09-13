@@ -122,8 +122,8 @@ const initGeofence = async () => {
                 { "name": "Green Dot", "position": [44.430064, 26.10697] }
             ],
             "timetableCustomAreas": [
-                { "name": "Orange Dot", "position": [44.430735, 26.110162], "time": 1600198502000, "error": 10 },
-                { "name": "Blue Dot", "position": [44.430432, 26.115065], "time": 1600133702000, "error": 10 }
+                { "name": "Orange Dot", "position": [44.430735, 26.110162], "time": 1600167600000, "error": 10 },
+                { "name": "Blue Dot", "position": [44.430432, 26.115065], "time": 1600142400000, "error": 10 }
             ]
         },
         "customConfig": {
