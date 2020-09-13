@@ -60,8 +60,6 @@ const getNotifyMessage = async (notifyType: notifyType, needle: Needle) => {
 
     Object.keys(map).forEach(key => message = message.replace(new RegExp(`{{${ key }}}`, 'g'), map[key]));
 
-    console.log(message);
-
     return message;
 }
 
