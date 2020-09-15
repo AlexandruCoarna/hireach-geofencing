@@ -5,6 +5,12 @@
     <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+          integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+            integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+            crossorigin=""></script>
     <title>Document</title>
 </head>
 
@@ -48,11 +54,16 @@
     span {
         flex: 4
     }
+
+    #mapid {
+        height: 500px;
+    }
+
 </style>
 
 <body>
 <div id="container">
-    <img src="predefined_route.png" alt="">
+    <div id="mapid"></div>
     <div id="button-holder">
         <div>
             <button onclick="subscribeAndAddSupervisor()">Subscribe and become supervisor</button>
@@ -87,12 +98,14 @@
             <span>This will place the target in the Red Area and <strong>after 1 minute </strong>will send a notification if the target is in the same place about the fact that the target stays too much in the same spot.</span>
         </div>
         <div>
-            <button onclick="bAreaReachedDestination()">B Area</button>
+            <button onclick="endAreaReachedDestination()">End Area</button>
             <span>This is the end of the route, this will trigger a notification about the fact the target reached the destination.</span>
         </div>
     </div>
 </div>
 
 </body>
-<script src="index.js"></script>
+<script src="index.js">
+
+</script>
 </html>
