@@ -39,7 +39,7 @@ type notifyType =
     | "notifySameLocation";
 
 const getNotifyMessage = async (notifyType: notifyType, needle: Needle) => {
-    if (!needle.id) throw new CustomError("needle.id is required for notify mesasges");
+    if (!needle.id) throw new CustomError("needle.id is required for notify messages");
 
     const customConf: CustomConfig = await generateCustomConfig(undefined, needle.id);
 

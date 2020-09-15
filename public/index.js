@@ -29,7 +29,7 @@ const initGeofence = async () => {
             "fenceAreaBorderMeters": 30,
             "fenceAreaBetweenPointsMeters": 15,
             "customAreaRadiusMeters": 15,
-            "notifyMessageLanguage": "en",
+            "notifyMessageLanguage": "engleza",
             "targetName": "John Doe",
             "sameLocationTime": 1,
             "notifyFenceStartedStatus": true,
