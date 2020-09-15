@@ -40,6 +40,31 @@ Put the right tileHost for tile38 server in config-development.ts / config-produ
 Using compose with Docker will automatically set containers to restart on any server restart and, also the pm2 processes will run automatically.
 Using standalone images requires an extra setup for this functionality.
 
+## Demo
+
+The public directory contains a demo web app.
+
+To be able to receive web push notifications, please update the `webPush` property in `config-development | config-production` file with the following credentials.
+
+```json
+{
+    "privateKey": "mgDcKEWkpo7AXc6UJneeflSsAdZqYkC8l-_ONP8iVXc",
+    "publicKey": "BDLemtuPfbg6viIoGSgzkkeB211dtacOjHaVCqKEJL88qMuY3mnx44eVCPNYp5Wd54EdbYS8YIhBjPABuRkZvSE",
+    "mailTo": "mailto:test@test.com"
+}
+```
+
+These credentials are used for test purposes only and making the private key public is not an issue.
+
+In `/public/index.js` in function `initGeofence` edit the `time` property value for `payload.fence.timetableCustomAreas` with proper unix timestamp value.
+
+```
+"timetableCustomAreas": [
+    { "name": "Orange Dot", "position": [44.430735, 26.110162], "time": 1600167600000, "error": 10 },
+    { "name": "Blue Dot", "position": [44.430432, 26.115065], "time": 1600142400000, "error": 10 }
+]
+``` 
+
 ## Generating Predefined Route
 Tile38 is used as a helper to detect if a certain position is in a certain area or more areas intersect one with each other.
 

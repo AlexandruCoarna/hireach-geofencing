@@ -74,7 +74,6 @@ router.post('', HandleHttp(async (request, response) => {
         await set("targetEarlyNotificationTimetableCustomAreas", params.id, []);
         await set("targetLastLocation", params.id, []);
 
-
         let message = "";
         if (customConf.notifyFenceStartedStatus) {
             message = await getNotifyMessage('notifyFenceStarted', {
@@ -125,7 +124,7 @@ router.put('/custom-config', HandleHttp(async (request, response) => {
 router.put("/supervisor", HandleHttp(async (request, response) => {
     const params: PutDeleteTargetSupervisor = request.body;
 
-    await validatePutDeleteSupervisorParams(params, false);
+    await validatePutDeleteSupervisorParams(params, true);
     await addSupervisor(params);
 
     response.status(200);

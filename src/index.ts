@@ -57,7 +57,6 @@ app.get("/", HandleHttp(async (request, response) => {
 
     res.data.keys = await tile.keys("*");
     res.data.target = await scan("target");
-    res.data.tempLocation = await scan("tempLocation");
     res.data.targetCustomConfig = await scan("targetCustomConfig");
     res.data.targetSessionStatus = await scan("targetSessionStatus");
     res.data.targetName = await scan("targetName");

@@ -38,11 +38,11 @@ const notifyMessages: NotifyMessages = {
         notifyEarlyArrival: `${ target } reached ${ timetableCustomArea } ${ timeDifference } earlier.`,
         notifyReachedDestination: `${ target } reached the destination`,
         notifyFenceStarted: `${ target } started a new fence session`,
-        notifySameLocation: `${ target } is in the same location for ${ sameLocationTime } minute!`
+        notifySameLocation: `${ target } is in the same location for ${ sameLocationTime } minute(s)!`
     }
 }
 
-const notifyTitle: string = "Geofence Demo";
+const notifyTitle: string = "APP_NAME";
 
 
 export { notifyMessages, notifyTitle }
